@@ -106,6 +106,12 @@ reorder_entries = function(eta_true, eta, Lambda_true, Lambda, Theta_true, Theta
     eta[max_ind[2],] = sign(cor_mat[max_ind]) * eta[max_ind[2],]
     Lambda[,max_ind[2]] = sign(cor_mat[max_ind]) * Lambda[,max_ind[2]]
     Theta[,max_ind[2]] = sign(cor_mat[max_ind]) * Theta[,max_ind[2]]
+    eta_low[max_ind[2],] = sign(cor_mat[max_ind]) * eta_low[max_ind[2],]
+    Lambda_low[,max_ind[2]] = sign(cor_mat[max_ind]) * Lambda_low[,max_ind[2]]
+    Theta_low[,max_ind[2]] = sign(cor_mat[max_ind]) * Theta_low[,max_ind[2]]
+    eta_upp[max_ind[2],] = sign(cor_mat[max_ind]) * eta_upp[max_ind[2],]
+    Lambda_upp[,max_ind[2]] = sign(cor_mat[max_ind]) * Lambda_upp[,max_ind[2]]
+    Theta_upp[,max_ind[2]] = sign(cor_mat[max_ind]) * Theta_upp[,max_ind[2]]
     # Set to 0 because now the kth row of eta_true is "done"
     cor_mat[max_ind[1],] = 0
     cor_mat[,max_ind[2]] = 0
