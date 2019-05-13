@@ -1,7 +1,6 @@
 sampler_init <- function(random_init, N, D, S, K, J, X_type, X){
 
   if(random_init){ # INITIALIZE RANDOMLY
-    library(truncnorm)
     small_sd = 0.001
     med_sd = 1
     
@@ -13,8 +12,8 @@ sampler_init <- function(random_init, N, D, S, K, J, X_type, X){
     eta = matrix(rnorm(K*N, 0, med_sd), nrow=K, ncol=N)
     nu = matrix(rnorm(J*N, 0, small_sd), nrow=J, ncol=N)
     # Error components
-    sigsq_y_vec = matrix(1, nrow=D, ncol=1) # rtruncnorm(D, a=0, b=Inf, mean=0, sd=small_sd)
-    sigsq_x_vec = matrix(1, nrow=S, ncol=1) # rtruncnorm(S, a=0, b=Inf, mean=0, sd=small_sd)
+    sigsq_y_vec = matrix(1, nrow=D, ncol=1)
+    sigsq_x_vec = matrix(1, nrow=S, ncol=1)
     # Hyperparams for xi
     phi_xi = matrix(1, nrow=S, ncol=J)
     tau_xi = matrix(1, nrow=J, ncol=1)
