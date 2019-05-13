@@ -1,0 +1,26 @@
+{
+    "args" : [
+        "-I/Applications/RStudio.app/Contents/Resources/resources/libclang/builtin-headers/3.5",
+        "-I/Applications/RStudio.app/Contents/Resources/resources/libclang/builtin-headers/libc++/3.5",
+        "-I/usr/local/lib/R/3.5/site-library/Rcpp/include",
+        "-I/usr/local/lib/R/3.5/site-library/RcppArmadillo/include",
+        "-I/usr/local/lib/R/3.5/site-library/RcppDist/include",
+        "-I/usr/local/Cellar/r/3.5.1/lib/R/include",
+        "-DNDEBUG",
+        "-I/Users/Kelly/toxic/papers/dim_reduction/code/bayesian_sssfa/bs3fa/include",
+        "-DUSE_DOUBLE",
+        "-DEIGEN_NO_DEBUG",
+        "-DR_COMPILATION=TRUE",
+        "-funroll-loops",
+        "-ffast-math",
+        "-ffinite-math-only",
+        "-fopenmp",
+        "-I/usr/local/opt/gettext/include",
+        "-I/usr/local/opt/llvm/include",
+        "-fPIC",
+        "-fopenmp"
+    ],
+    "hash" : "155759775715572563631557253381",
+    "is_cpp" : true,
+    "pch" : "Rcpp"
+}
