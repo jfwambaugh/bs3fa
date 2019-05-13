@@ -20,7 +20,7 @@ plot_matrix <- function(A, type="other"){
           axis.ticks = element_blank(), legend.title = element_text(), 
           plot.title = element_text(hjust = 0.5)) + 
     xlab(xLab) + ylab(yLab) + scale_y_reverse() + 
-    ggtitle(expression(True~Lambda))
+    ggtitle(tit)
 }
 
 plot_Lambda_true <- function(Lambda, doses=1:nrow(Lambda)/nrow(Lambda), inds=1:3){
