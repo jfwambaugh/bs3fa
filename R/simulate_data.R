@@ -1,8 +1,8 @@
 ############# Bs^3FA data simulation #############
 
 normalize_and_rotate <- function(mat){
-  mat=pracma::gramSchmidt(mat)$Q # Orthogonalize Theta (if not already orthogonal)
-  mat=varimax(mat)$loadings # Rotate and normalize
+  mat = pracma::gramSchmidt(mat)$Q # Orthogonalize Theta (if not already orthogonal)
+  mat = mat %*% varimax(mat)$rotmat # Rotate and normalize
   return(mat)
 }
 simulate_lambda <- function(k, p){
