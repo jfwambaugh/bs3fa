@@ -87,7 +87,7 @@ plot_Lambda_mod_tru_k <- function(df, k, ylab_head, title_head, xLim, yLim){
     geom_line(aes(y = ul), lty = 3, colour = 'black') +
     geom_line(aes(y = ll), lty = 3, colour = 'black')+
     geom_line(lty = 2) + geom_line(aes(y = truth), colour = 'red') +
-    ylab(ylab_head) + ggtitle(paste(ylab_head,k)) + ylim(yLim) + xlim(xLim) + 
+    ylab(ylab_head) + ggtitle(paste(title_head,k)) + ylim(yLim) + xlim(xLim) + 
     theme_minimal() + theme_bw()
 }
 
