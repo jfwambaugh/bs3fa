@@ -34,20 +34,26 @@ plot_Lambda_true <- function(Lambda, doses=1:nrow(Lambda)/nrow(Lambda), inds=1:3
   xLim = range(doses)
   yLim = range(Lambda[,inds])
   if(length(inds)>3){stop("inds must be of length <= 3")}
-  if(length(inds)==1){
+  if(length(inds)>=1){
     p1 = qplot(doses, Lambda[,inds[1]], geom="line") + xlim(xLim) + ylim(yLim) + 
       theme_minimal() + theme_bw() + xlab("dose") + ylab("loading") + 
       ggtitle(paste("Loading",inds[1]))
-    grid.arrange(p1, nrow = 1)
-  }else if(length(inds)==2){
+  }
+  if(length(inds)>=2){
     p2 = qplot(doses, Lambda[,inds[2]], geom="line") + xlim(xLim) + ylim(yLim) +
       theme_minimal() + theme_bw() + xlab("dose") + ylab("loading") + 
       ggtitle(paste("Loading",inds[2]))
-    grid.arrange(p1, p2, nrow = 1)
-  }else{
+  }
+  if(length(inds)>=3){
     p3 = qplot(doses, Lambda[,inds[3]], geom="line") + xlim(xLim) + ylim(yLim) +
       theme_minimal() + theme_bw() + xlab("dose") + ylab("loading") + 
       ggtitle(paste("Loading",inds[3]))
+  }
+  if(length(inds)==1){
+    grid.arrange(p1, nrow = 1)
+  }else if(length(inds)==2){
+    grid.arrange(p1, p2, nrow = 1)
+  }else{
     grid.arrange(p1, p2, p3, nrow = 1)
   }
 }
