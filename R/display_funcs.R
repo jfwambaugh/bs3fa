@@ -1,4 +1,4 @@
-plot_matrix <- function(A, type="other", tit=NULL){
+plot_matrix <- function(A, type="other", tit=NULL, include_legend=T){
   library(reshape2)
   library(ggplot2)
   longA = melt(A)
@@ -12,6 +12,7 @@ plot_matrix <- function(A, type="other", tit=NULL){
     xLab="k"; yLab="p"
     if(is.null(tit)){tit = "Matrix entries"}
   }
+  if(include_legend){
   ggplot(longA, aes(x = Var2, y = Var1)) + 
     geom_tile(aes(fill=value), colour="grey20") + 
     scale_fill_gradient2(low = "#3d52bf", high = "#33961b", mid = "white") + 
@@ -21,6 +22,17 @@ plot_matrix <- function(A, type="other", tit=NULL){
           plot.title = element_text(hjust = 0.5)) + 
     xlab(xLab) + ylab(yLab) + scale_y_reverse() + 
     ggtitle(tit)
+  } else{
+    ggplot(longA, aes(x = Var2, y = Var1)) + 
+      geom_tile(aes(fill=value), colour="grey20") + 
+      scale_fill_gradient2(low = "#3d52bf", high = "#33961b", mid = "white") + 
+      theme(panel.grid.major = element_blank(), panel.border = element_blank(), 
+            axis.text = element_blank(), panel.background = element_blank(), 
+            axis.ticks = element_blank(), legend.position = "none", 
+            plot.title = element_text(hjust = 0.5)) + 
+      xlab(xLab) + ylab(yLab) + scale_y_reverse() + 
+      ggtitle(tit)
+  }
 }
 
 plot_Lambda_true <- function(Lambda, doses=1:nrow(Lambda)/nrow(Lambda), inds=1:3){
