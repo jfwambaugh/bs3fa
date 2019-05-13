@@ -44,7 +44,8 @@ simulate_data <- function(N,D,S,K,J,std_error_y,std_error_x,prob_miss=0,real_Y=N
   eta_true=matrix(rnorm(K*N), nrow=K, ncol=N)
   e_y=matrix(rnorm(D*N, mean=0, sd=std_error_y),nrow=D,ncol=N)
   # Get Y itself and make some values unobserved (if prob_miss > 0)
-  Y = Lambda_true %*% eta_true + e_y
+  true_curve = Lambda_true %*% eta_true
+  Y = true_curve + e_y
   for(ii in 1:nrow(Y)){for(jj in 1:ncol(Y)){if( rbinom(1,1,prob=prob_miss) ){ Y[ii,jj] = NA }}}
   
   # Set up necessary matrices for X
@@ -58,6 +59,7 @@ simulate_data <- function(N,D,S,K,J,std_error_y,std_error_x,prob_miss=0,real_Y=N
 
   dat_list = list("X"=X,"Y"=Y,"eta_true"=eta_true,"Lambda_true"=Lambda_true,"e_y"=e_y,
                   "Theta_true"=Theta_true,"xi_true"=xi_true,"nu_true"=nu_true,"e_x"=e_x,
-                  "avg_dose_resp"=avg_dose_resp,"K"=K,"J"=J,"doses"=doses_long)
+                  "avg_dose_resp"=avg_dose_resp,"K"=K,"J"=J,"doses"=doses_long, 
+                  "true_curve"=true_curve)
   return(dat_list)
 }

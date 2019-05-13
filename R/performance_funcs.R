@@ -134,3 +134,23 @@ reorder_entries = function(eta_true, eta, Lambda_true, Lambda, Theta_true, Theta
   return(res)
 }
 
+pred_drcurve <- function(Lambda_mod, eta_mod, rescale=1){
+  nsims = dim(Lambda_mod)[3]
+  D = dim(Lambda_mod)[1]
+  N = dim(eta_mod)[2]
+  # Get predicted dose response curve for each Gibbs iter
+  dr_mod = array(NA, dim=c(D,N,nsims))
+  for(s in 1:nsims){ dr_mod[,,s] = Lambda_mod[,,s] %*% eta_mod[,,s] }
+  dr_mod = dr_mod / rescale
+  # Get estimated dose response curve and 95% credible interval
+  dr_est = dr_low = dr_upp = matrix(NA, nrow=D, ncol=N)
+  for(i in 1:N){
+    # Get mean and lower 2.5% and upper 97.5% of 95% credible interval
+    dr_est[,i] = apply(dr_mod[,i,],1,mean)
+    dr_low[,i] = apply(dr_mod[,i,],1,function(x) unname(quantile(x,0.025)))
+    dr_upp[,i] = apply(dr_mod[,i,],1,function(x) unname(quantile(x,0.975)))
+  }
+  dr_list = list("dr_est"=dr_est, "dr_low"=dr_low, "dr_upp"=dr_upp)
+  return(dr_list)
+}
+
