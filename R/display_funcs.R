@@ -81,41 +81,48 @@ plot_Lambda <- function(Lambda_low, Lambda, Lambda_upp, Lambda_true, k, dose=1:n
     theme_minimal() + theme_bw()
 }
 
-plot_Lambda_mod_tru_k <- function(df, k){
+plot_Lambda_mod_tru_k <- function(df, k, ylab_head, title_head){
   ggplot(data = df, aes(dose, est)) +
     geom_ribbon(aes(x=dose, ymax=ll, ymin=ul), fill="grey", alpha=.5) +
     geom_line(aes(y = ul), lty = 3, colour = 'black') +
     geom_line(aes(y = ll), lty = 3, colour = 'black')+
     geom_line(lty = 2) + geom_line(aes(y = truth), colour = 'red') +
-    ylab("loading") + ggtitle(paste("Loading",k)) + 
+    ylab(ylab_head) + ggtitle(paste(ylab_head,k)) + 
     theme_minimal() + theme_bw()
 }
 
 plot_Lambda_mod_tru <- function(Lambda_low, Lambda, Lambda_upp, Lambda_true, 
-                                doses=1:nrow(Lambda)/nrow(Lambda), inds=1:3){
+                                doses=1:nrow(Lambda)/nrow(Lambda), inds=1:3,
+                                ylab_head="loading", title_head="Loading",
+                                mean_curve=rep(0,length(doses))){
   library(gridExtra)
   library(ggplot2)
-  Lambda = as.data.frame(Lambda)
   xLim = range(doses)
   yLim = range(c(Lambda_low[,inds],Lambda_upp[,inds],Lambda_true[,inds]))
   if(length(inds)>3){stop("inds must be of length <= 3")}
   if(length(inds)>=1){
-    df = as.data.frame(cbind(doses, Lambda_low[,inds[1]], Lambda[,inds[1]], 
-                             Lambda_upp[,inds[1]], Lambda_true[,inds[1]]))
+    df = as.data.frame(cbind(doses, Lambda_low[,inds[1]]+mean_curve, 
+                             Lambda[,inds[1]]+mean_curve, 
+                             Lambda_upp[,inds[1]]+mean_curve, 
+                             Lambda_true[,inds[1]]+mean_curve))
     colnames(df) = c("dose", "ll", "est", "ul", "truth")
-    p1 = plot_Lambda_mod_tru_k(df, inds[1])
+    p1 = plot_Lambda_mod_tru_k(df, inds[1], ylab_head, title_head)
   }
   if(length(inds)>=2){
-    df = as.data.frame(cbind(doses, Lambda_low[,inds[2]], Lambda[,inds[2]], 
-                             Lambda_upp[,inds[2]], Lambda_true[,inds[2]]))
+    df = as.data.frame(cbind(doses, Lambda_low[,inds[2]]+mean_curve, 
+                             Lambda[,inds[2]]+mean_curve, 
+                             Lambda_upp[,inds[2]]+mean_curve, 
+                             Lambda_true[,inds[2]]+mean_curve))
     colnames(df) = c("dose", "ll", "est", "ul", "truth")
-    p2 = plot_Lambda_mod_tru_k(df, inds[2])
+    p2 = plot_Lambda_mod_tru_k(df, inds[2], ylab_head, title_head)
   }
   if(length(inds)>=3){
-    df = as.data.frame(cbind(doses, Lambda_low[,inds[3]], Lambda[,inds[3]], 
-                             Lambda_upp[,inds[3]], Lambda_true[,inds[3]]))
+    df = as.data.frame(cbind(doses, Lambda_low[,inds[3]]+mean_curve, 
+                             Lambda[,inds[3]]+mean_curve, 
+                             Lambda_upp[,inds[3]]+mean_curve, 
+                             Lambda_true[,inds[3]]+mean_curve))
     colnames(df) = c("dose", "ll", "est", "ul", "truth")
-    p3 = plot_Lambda_mod_tru_k(df, inds[3])
+    p3 = plot_Lambda_mod_tru_k(df, inds[3], ylab_head, title_head)
   }
   if(length(inds)==1){
     grid.arrange(p1, nrow = 1)
