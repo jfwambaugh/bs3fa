@@ -1,16 +1,16 @@
-plot_matrix <- function(A, type="other"){
+plot_matrix <- function(A, type="other", tit=NULL){
   library(reshape2)
   library(ggplot2)
   longA = melt(A)
   if( type=="Lambda" ){
     xLab="k"; yLab="d"
-    tit = expression(Lambda~entries)
+    if(is.null(tit)){tit = expression(Lambda~entries)}
   } else if( type=="Theta" ){
     xLab="k"; yLab="s"
-    tit = expression(Theta~entries)
+    if(is.null(tit)){tit = expression(Theta~entries)}
   } else{
     xLab="k"; yLab="p"
-    tit = "Matrix entries"
+    if(is.null(tit)){tit = "Matrix entries"}
   }
   ggplot(longA, aes(x = Var2, y = Var1)) + 
     geom_tile(aes(fill=value), colour="grey20") + 
