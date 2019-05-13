@@ -1,6 +1,7 @@
 ############# Bs^3FA data simulation #############
 
 normalize_and_rotate <- function(mat){
+  library(pracma)
   mat = pracma::gramSchmidt(mat)$Q # Orthogonalize Theta (if not already orthogonal)
   mat = mat %*% varimax(mat)$rotmat # Rotate and normalize
   return(mat)

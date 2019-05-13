@@ -15,6 +15,7 @@ Suggests:
     ggplot2,
     gridExtra,
     mvtnorm,
-    sparseEigen
+    sparseEigen,
+    pracma
 LinkingTo: Rcpp, RcppArmadillo, RcppDist
 LazyData: true
