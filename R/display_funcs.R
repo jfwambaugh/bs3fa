@@ -1,30 +1,26 @@
 plot_matrix <- function(A, type="other"){
   library(reshape2)
   library(ggplot2)
-  P<-nrow(A)
-  K<-ncol(A)
-  longData<-cbind(which(!is.na(A),arr.ind = TRUE),as.vector(A))
-  longData<-as.data.frame(longData)
-  colnames(longData) <- c("row", "col", "value")
+  longA = melt(A)
   if( type=="Lambda" ){
-    yLab = "d"; xLab = "k"
+    xLab="k"; yLab="d"
     tit = expression(Lambda~entries)
   } else if( type=="Theta" ){
-    yLab = "s"; xLab = "k"
+    xLab="k"; yLab="s"
     tit = expression(Theta~entries)
   } else{
-    yLab = "p"; xLab = "k"
+    xLab="k"; yLab="p"
     tit = "Matrix entries"
   }
-  ggplot(longData, aes(x = col, y = row)) + 
-    geom_raster(aes(fill=value)) + 
-    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
-                         midpoint = 0) +
-    labs(title=tit) + theme_bw() +
-    theme_minimal() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
-                            axis.text.y=element_text(size=9),
-                            plot.title=element_text(size=11)) +
-    scale_y_reverse() + ylab(yLab) + xlab(xLab)
+  ggplot(longA, aes(x = Var2, y = Var1)) + 
+    geom_tile(aes(fill=value), colour="grey20") + 
+    scale_fill_gradient2(low = "#3d52bf", high = "#33961b", mid = "white") + 
+    theme(panel.grid.major = element_blank(), panel.border = element_blank(), 
+          axis.text = element_blank(), panel.background = element_blank(), 
+          axis.ticks = element_blank(), legend.title = element_text(), 
+          plot.title = element_text(hjust = 0.5)) + 
+    xlab(xLab) + ylab(yLab) + scale_y_reverse() + 
+    ggtitle(expression(True~Lambda))
 }
 
 plot_Lambda_true <- function(Lambda, doses=1:nrow(Lambda)/nrow(Lambda), inds=1:3){
