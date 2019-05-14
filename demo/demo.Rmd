@@ -77,7 +77,7 @@ bs3fa::plot_data(Y=dat$Y, true_curve=dat$Lambda_true%*%dat$eta_true,
 \setstackgap{L}{8pt}
 \def\stacktype{L}
 \stackunder{Y_i}{\sss D\times 1} =  \stackunder{\Lambda}{\sss D\times K\text{ }}
-\stackunder{\eta_i}{\sss K\times 1} + \stackunder{\varepsilon_i}{\sss D\times 1},
+\stackunder{\eta_i}{\sss K\times 1} + \stackunder{\varepsilon_i}{\sss D\times 1}.
 \end{equation*}
 
 ```{r plot-lambda-1, fig.align='center', fig.height=2.5, fig.width=4.5, echo=F, warning=F}
@@ -91,7 +91,7 @@ bs3fa::plot_matrix(dat$Lambda_true, type="Lambda")
 \setstackgap{L}{8pt}
 \def\stacktype{L}
 \stackunder{Y_i}{\sss D\times 1} =  \stackunder{\Lambda}{\sss D\times K\text{ }}
-\stackunder{\eta_i}{\sss K\times 1} + \stackunder{\varepsilon_i}{\sss D\times 1},
+\stackunder{\eta_i}{\sss K\times 1} + \stackunder{\varepsilon_i}{\sss D\times 1}.
 \end{equation*}
 
 ```{r plot-lambda-2, fig.align='center', fig.height=2.5, fig.width=4.5, echo=F, warning=F}
@@ -336,11 +336,10 @@ bs3fa::plot_Lambda_mod_tru(Lambda_low=res_clean$Lambda_low, Lambda=res_clean$Lam
 \def\sss{\scriptscriptstyle}
 \setstackgap{L}{8pt}
 \def\stacktype{L}
-\stackunder{X_i}{\sss S\times 1} =  \stackunder{\Theta}{\sss S\times K\text{ }}
+\stackunder{Y_i}{\sss D\times 1} =  \stackunder{\Lambda}{\sss D\times K\text{ }}
+\stackunder{\eta_i}{\sss K\times 1} + \stackunder{\varepsilon_i}{\sss D\times 1}, \quad \stackunder{X_i}{\sss S\times 1} =  \stackunder{\Theta}{\sss S\times K\text{ }}
 \stackunder{\eta_i}{\sss K\times 1} + \stackunder{\Xi}{\sss S\times J\text{ }}
-\stackunder{\nu_i}{\sss J\times 1} + \stackunder{\mathrm{e}_i}{\sss S\times 1}, \quad \stackunder{X_i}{\sss S\times 1} =  \stackunder{\Theta}{\sss S\times K\text{ }}
-\stackunder{\eta_i}{\sss K\times 1} + \stackunder{\Xi}{\sss S\times J\text{ }}
-\stackunder{\nu_i}{\sss J\times 1} + \stackunder{\mathrm{e}_i}{\sss S\times 1},
+\stackunder{\nu_i}{\sss J\times 1} + \stackunder{\mathrm{e}_i}{\sss S\times 1}.
 \end{equation*} \vfill
 
 - Toxicity ``distance'' between chemicals $i$ and $j$ can be represented in the shared factor space (i.e., how far apart the two vectors $\eta_i$ and $\eta_j$ are) \vfill
