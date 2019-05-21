@@ -18,7 +18,7 @@ library(gridExtra)
 - Download R and Rstudio (see helpful instructions \href{https://courses.edx.org/courses/UTAustinX/UT.7.01x/3T2014/56c5437b88fa43cf828bff5371c6a924/}{here}).
 - Package available at: \href{https://github.com/kelrenmor/bs3fa}{https://github.com/kelrenmor/bs3fa}.
 - Demo code available at \href{https://github.com/kelrenmor/bs3fa/tree/master/demo}{https://github.com/kelrenmor/bs3fa/tree/master/demo}.
-```{r download-package, message=F, warning=F}
+```{r download-package, message=F, warning=F, eval = F}
 # Install bs3fa if not already done
 devtools::install_github("kelrenmor/bs3fa", 
                          quiet=T, upgrade=F,
@@ -247,26 +247,29 @@ $$
 
 ## Model performance ($\Theta$)
 
-```{r model-display-the-pre-clean, fig.align='center', fig.height=2.75, fig.width=4.5, echo=F, warning=F}
-p1 <- bs3fa::plot_matrix(dat$Theta_true, type="Theta", tit="Truth", include_legend=F)
-The_tmp = matrix(NA,nrow=nrow(dat$Theta_true),ncol=K_p)
-for(k_mod in 1:K_p){
-  # Get mean
-  The_tmp[,k_mod] = apply(res$Theta_save[,k_mod,],1,mean)
-}
-p2 <- bs3fa::plot_matrix(The_tmp, type="Theta", tit="Estimate", include_legend=F)
-gridExtra::grid.arrange(p1, p2, nrow = 1, widths = c(3/9,6/9))
+```{r model-display-the-pre-clean, fig.align='center', fig.height=2.35, fig.width=4.5, echo=F, warning=F}
+#p1 <- bs3fa::plot_matrix(dat$Theta_true, type="Theta", tit="Truth", include_legend=F)
+#The_tmp = matrix(NA,nrow=nrow(dat$Theta_true),ncol=K_p)
+#for(k_mod in 1:K_p){
+#  # Get mean
+#  The_tmp[,k_mod] = apply(res$Theta_save[,k_mod,],1,mean)
+#}
+#p2 <- bs3fa::plot_matrix(The_tmp, type="Theta", tit="Estimate", include_legend=F)
+#gridExtra::grid.arrange(p1, p2, nrow = 1, widths = c(3/9,6/9))
 
-## Model performance ($\Lambda$)
-# p1 <- bs3fa::plot_matrix(dat$Lambda_true*res$norm_rescale, type="Lambda", tit="Truth", include_legend=F)
-# Lam_tmp = matrix(NA,nrow=nrow(dat$Lambda_true),ncol=K_p)
-# for(k_mod in 1:K_p){
-#   # Get mean
-#   Lam_tmp[,k_mod] = apply(res$Lambda_save[,k_mod,],1,mean)
-# }
-# p2 <- bs3fa::plot_matrix(Lam_tmp, type="Lambda", tit="Estimate", include_legend=F)
-# gridExtra::grid.arrange(p1, p2, nrow = 1, widths = c(3/9,6/9))
+# Model performance ($\Lambda$)
+ p1 <- bs3fa::plot_matrix(dat$Lambda_true*res$norm_rescale, type="Lambda", tit="Truth", include_legend=F)
+ Lam_tmp = matrix(NA,nrow=nrow(dat$Lambda_true),ncol=K_p)
+ for(k_mod in 1:K_p){
+   # Get mean
+   Lam_tmp[,k_mod] = apply(res$Lambda_save[,k_mod,],1,mean)
+ }
+ p2 <- bs3fa::plot_matrix(Lam_tmp, type="Lambda", tit="Estimate", include_legend=F)
+ gridExtra::grid.arrange(p1, p2, nrow = 1, widths = c(3/9,6/9))
 ```
+
+We have recovered very closely one of the matrices in the equivalence class with our true $\Lambda$ matrix. All of the forms of inference we can do on this estimated matrix are still valid: the groups and the contrasts within each factor column are maintained.
+
 
 ## Matching model column indices and sign to truth
 
@@ -295,6 +298,8 @@ p1 <- bs3fa::plot_matrix(dat$Theta_true, type="Theta", tit="Truth", include_lege
 p2 <- bs3fa::plot_matrix(res_clean$Theta, type="Theta", tit="Estimate", include_legend=F)
 gridExtra::grid.arrange(p1, p2, nrow = 1, widths = c(3/9,6/9))
 ```
+We recover $\Theta$ very well alongside $\Lambda$, here processed to align with the truth.
+
 
 ## Model performance ($\Theta$)
 
@@ -303,6 +308,7 @@ p1 <- bs3fa::plot_matrix(res_clean$Theta_low, type="Theta", tit="Lower 2.5%", in
 p2 <- bs3fa::plot_matrix(res_clean$Theta_upp, type="Theta", tit="Upper 97.5%", include_legend=F)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
+The interval estimates we recover for these parameters are very tight, and usually contain the true values.
 
 ## Model performance ($\Lambda$)
 
@@ -311,6 +317,7 @@ p1 <- bs3fa::plot_matrix(dat$Lambda_true*res$norm_rescale, type="Lambda", tit="T
 p2 <- bs3fa::plot_matrix(res_clean$Lambda, type="Lambda", tit="Estimate", include_legend=F)
 gridExtra::grid.arrange(p1, p2, nrow = 1, widths = c(3/9,6/9))
 ```
+Here our $\Lambda$ estimate has been aligned with the truth. This realignment does not affect the estimates of identifiable elements.
 
 ## Model performance ($\Lambda$)
 
@@ -319,6 +326,7 @@ p1 <- bs3fa::plot_matrix(res_clean$Lambda_low, type="Lambda", tit="Lower 2.5%", 
 p2 <- bs3fa::plot_matrix(res_clean$Lambda_upp, type="Lambda", tit="Upper 97.5%", include_legend=F)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
+The interval estimates for $\Lambda$ are similarly exact.
 
 ## Model performance ($\Lambda$)
 
@@ -328,6 +336,7 @@ bs3fa::plot_Lambda_mod_tru(Lambda_low=res_clean$Lambda_low, Lambda=res_clean$Lam
             Lambda_true=dat$Lambda_true*res$norm_rescale,
             doses=dat$doses, inds=1:3)
 ```
+Here are the smooth curves corresponding to this $\Lambda$ estimate.
 
 ## Moving to chemical ``distance'' and prediction
 
@@ -356,6 +365,7 @@ qplot(c(dat$eta_true), c(res_clean$eta[1:K,]), geom="point", alpha=0.2, show.leg
   geom_abline(intercept=0, slope=1, color="red") + 
   theme_minimal() + theme_bw()
 ```
+We show high predictive power for the latent factors
 
 ## Model performance (distance)
 
@@ -368,6 +378,7 @@ qplot(dist_tru, dist_mod, geom="point", alpha=0.8, show.legend = F) +
   geom_abline(intercept=0, slope=1, color="red") + 
   theme_minimal() + theme_bw()
 ```
+We also show high predictive power for the simulated chemical distances
 
 ## Model performance (prediction)
 
