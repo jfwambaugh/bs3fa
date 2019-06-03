@@ -4,7 +4,7 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
                                        "reset_ls"=round(3*burnin/4), "l_new"=NULL),
                         fr_normalize=T, random_init=T, homo_Y=T, print_progress=T, scale_X=T,
                         a1_delta_xi=2.1, a1_delta_om=2.1, a2_delta_xi=3.1, a2_delta_om=3.1,
-                        bad_samp_tol=nsamps_save){
+                        bad_samp_tol=nsamps_save, debug=F){
 
   # X - S x N chemical feature matrix, where S is the number of features and N is the no of obs.
   # Y - D x N dose response curve matrix, where S is the number of doses and N is the no of obs.
@@ -35,6 +35,7 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
   # a1_delta_xi/a1_delta_om - Hyperparameters for B&D shrinkage prior.
   # a2_delta_xi/a2_delta_om - Hyperparameters for B&D shrinkage prior.
   # bad_samp_tol - Total number of bad_samps before killing sampler.
+  # debug - For internal debugging, will print when Lambda sample is bad.
 
   # Load libraries and Cpp functions
   library(abind)
@@ -121,6 +122,7 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
   init=T # Whether or not intialization is needed (will be changed to F upon initialization in sampler)
   ind=1 # Starting index for saving values.
   bad_samps=0 # Number of samples for which cov matrix is not symmetric PD
+  inf_samps=0 # Number of samples for which the non-continuous X samps come up inf
   nsamps = nsamps_save*thin + burnin # Total number of times to loop through sampler.
   update_samps = seq(1, nsamps, round(nsamps/20))
   psi_lam_min = Inf # Initialize to infinity so anything is smaller.
@@ -148,6 +150,12 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
     Lam_samp = sample_Lambda_err(Y, Lambda, eta, alpha_lam, sigsq_y_vec, covDD, obs_Y)
     Lambda = Lam_samp$Lambda
     bad_samps = bad_samps + Lam_samp$bad
+    if( debug ){
+      print(ss)
+      if( Lam_samp$bad==1 ){
+        print("BAD LAMBDA SAMPLE!")
+      }
+    }
     if( bad_samps>bad_samp_tol){
       print(paste(sep="","Error: bad_samps=",bad_samps,"with l=",l,", try smaller l"))
       return(-1)
@@ -166,7 +174,18 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
     
     ##### Sample latent variable Z corresponding to non-continuous X  #####
     
-    Z = sample_X(X_type, X, sigsq_x_vec, Theta, eta, xi, nu)
+    Z_samp = sample_X(X_type, X, sigsq_x_vec, Theta, eta, xi, nu)
+    Z = Z_samp$Z
+    inf_samps = inf_samps + 1*(sum(Z_samp$inf_samples)>1)
+    if( debug ){
+      if( 1*(sum(Z_samp$inf_samples)>1) ){
+        print("BAD Z SAMPLE!")
+      }
+    }
+    if( inf_samps>bad_samp_tol){
+      print(paste(sep="","Error: inf_samps=",inf_samps,", try increasing J"))
+      return(-1)
+    }
     
     ##### Sample X-specific factor loading matrix \xi, scores \nu, and shrinkage params  #####
     

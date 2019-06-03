@@ -507,7 +507,7 @@ arma::mat get_covDD(arma::vec d_vec, double l){
     for( int j=(i+1); j<D; j++ ){
       double d1 = d_vec(i);
       double d2 = d_vec(j);
-      double tmp_cov = exp(-0.5*inv_lsq*pow(d1-d2,2.0));
+      double tmp_cov = exp(-0.5*inv_lsq*pow(abs(d1-d2),1.9999)); // vs. 2.0 for numeric stability
       covDD(i, j) = tmp_cov;
       covDD(j, i) = tmp_cov;
     }
@@ -817,8 +817,8 @@ arma::mat sample_Y_miss(arma::mat Lambda, arma::mat eta, arma::vec sigsq_y,
  */
 
 // [[Rcpp::export]]
-arma::mat sample_X(std::vector< std::string > type, arma::mat X_original, arma::vec sigsq_x,
-                   arma::mat Theta, arma::mat eta, arma::mat xi, arma::mat nu){
+Rcpp::List sample_X(std::vector< std::string > type, arma::mat X_original, arma::vec sigsq_x,
+                    arma::mat Theta, arma::mat eta, arma::mat xi, arma::mat nu){
   /* 
   * Function for sampling the latent variable x underlying x_{original}.
   * For binary x_{original}, x|{all},x_o=0 ~ N_(E[x_o], 1) and x|{all},x_o=1 ~ N+(E[x_o], 1).
@@ -838,6 +838,7 @@ arma::mat sample_X(std::vector< std::string > type, arma::mat X_original, arma::
   std::string conti ("continuous");
   std::string binar ("binary");
   std::string count ("count");
+  int inf_s=0; // Number of times an infinite sample is drawn (breaks sampler).
 
   for( int s=0; s<S; s++ ){
     if( conti.compare(type[s]) != 0 ){ // If variable s is NOT continuous.
@@ -850,12 +851,15 @@ arma::mat sample_X(std::vector< std::string > type, arma::mat X_original, arma::
         if( conti.compare(type[s]) != 0 ){ // If variable s is binary.
           if( Xsi_original==0 ){
             X_samp(i) = r_truncnorm(E_Xs[i], sig_xs, -inf, 0);
+            if( isinf(X_samp(i)) ){ X_samp(i)=-50; inf_s=inf_s+1; }
           } else{
             X_samp(i) = r_truncnorm(E_Xs[i], sig_xs, 0, inf);
+            if( isinf(X_samp(i)) ){ X_samp(i)=50; inf_s=inf_s+1; }
           }
         } else{ // If variable s is count.
           if( Xsi_original==0 ){
             X_samp(i) = r_truncnorm(E_Xs[i], sig_xs, -inf, 0);
+            if( isinf(X_samp(i)) ){ X_samp(i)=-50; inf_s=inf_s+1; }
           } else{
             X_samp(i) = r_truncnorm(E_Xs[i], sig_xs, Xsi_original-1, Xsi_original);
           }
@@ -865,10 +869,56 @@ arma::mat sample_X(std::vector< std::string > type, arma::mat X_original, arma::
     }
   }
   
-  return X;
+  return Rcpp::List::create(Rcpp::Named("Z") = X,
+                            Rcpp::Named("inf_samples") = inf_s);
 }
 
-
+// [[Rcpp::export]]
+arma::mat sample_X_init(std::vector< std::string > type, arma::mat X_original, arma::vec sigsq_x){
+  /* 
+  * Function for sampling the latent variable x underlying x_{original}.
+  * For binary x_{original}, x|{all},x_o=0 ~ N_(E[x_o], 1) and x|{all},x_o=1 ~ N+(E[x_o], 1).
+  * For count x_o, x|{all},x_o=0 ~ N_(E[x_o], \sig_x) and x|{all},x_o=j ~ N[j-1,j)(E[x_o], \sig_x).
+  * type is a length-S vector specifying {"continuous", "binary", "count"} for each variable in x_o.
+  * X_original is the S x N matrix of the observed X values.
+  * See https://cran.r-project.org/web/packages/RcppDist/vignettes/RcppDist.pdf
+  * 
+  */
+  int S = type.size();
+  int N = X_original.n_cols;
+  arma::mat X = X_original;
+  double inf = std::numeric_limits<double>::infinity();
+  std::string conti ("continuous");
+  std::string binar ("binary");
+  std::string count ("count");
+  
+  for( int s=0; s<S; s++ ){
+    if( conti.compare(type[s]) != 0 ){ // If variable s is NOT continuous.
+      arma::vec Xs_original = X_original.row(s).t();
+      double sig_xs = pow(sigsq_x(s), 0.5);
+      arma::vec X_samp(N);
+      for( int i=0; i<N; i++ ){
+        double Xsi_original = Xs_original(i);
+        if( conti.compare(type[s]) != 0 ){ // If variable s is binary.
+          if( Xsi_original==0 ){
+            X_samp(i) = r_truncnorm(0.0, sig_xs, -inf, 0);
+          } else{
+            X_samp(i) = r_truncnorm(0.0, sig_xs, 0, inf);
+          }
+        } else{ // If variable s is count.
+          if( Xsi_original==0 ){
+            X_samp(i) = r_truncnorm(0.0, sig_xs, -inf, 0);
+          } else{
+            X_samp(i) = r_truncnorm(Xsi_original+0.5, sig_xs, Xsi_original-1, Xsi_original);
+          }
+        }
+      }
+      X.row(s) = X_samp.t(); // Fill in row s with sampled X_{i,s} for all i.
+    }
+  }
+  
+  return X;
+}
 
 /* *********** MISC ADDITIONAL FUNCTIONS *********** 
  * 

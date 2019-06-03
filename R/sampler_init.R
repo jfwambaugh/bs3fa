@@ -12,8 +12,8 @@ sampler_init <- function(random_init, N, D, S, K, J, X_type, X){
     eta = matrix(rnorm(K*N, 0, med_sd), nrow=K, ncol=N)
     nu = matrix(rnorm(J*N, 0, small_sd), nrow=J, ncol=N)
     # Error components
-    sigsq_y_vec = matrix(1, nrow=D, ncol=1)
-    sigsq_x_vec = matrix(1, nrow=S, ncol=1)
+    sigsq_y_vec = matrix(med_sd^2, nrow=D, ncol=1)
+    sigsq_x_vec = matrix(small_sd^2, nrow=S, ncol=1)
     # Hyperparams for xi
     phi_xi = matrix(1, nrow=S, ncol=J)
     tau_xi = matrix(1, nrow=J, ncol=1)
@@ -31,7 +31,7 @@ sampler_init <- function(random_init, N, D, S, K, J, X_type, X){
     tau_ome = matrix(1, nrow=K, ncol=1)
     delta_ome = matrix(1, nrow=K, ncol=1)
     # Latent variable Z for non-continuous X
-    Z = sample_X(X_type, X, sigsq_x_vec, Theta, eta, xi, nu)
+    Z = sample_X_init(X_type, X, sigsq_x_vec)
     
   } else{ # INITIALIZE TO SVD SOLUTIONS
     svd_xy = svd(rbind(X,Y))
@@ -64,7 +64,7 @@ sampler_init <- function(random_init, N, D, S, K, J, X_type, X){
     # Hyperparameters for shared column shrinkage
     tau_ome = matrix(1, nrow=K, ncol=1)
     delta_ome = matrix(1, nrow=K, ncol=1)
-    Z = sample_X(X_type, X, sigsq_x_vec, Theta, eta, xi, nu)
+    Z = sample_X_init(X_type, X, sigsq_x_vec)
   }
 
   init_list = list("Lambda"=Lambda, "Theta"=Theta, "xi"=xi, "eta"=eta, "nu"=nu, "sigsq_y_vec"=sigsq_y_vec, 
