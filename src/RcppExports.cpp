@@ -344,7 +344,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // sample_X
-arma::mat sample_X(std::vector< std::string > type, arma::mat X_original, arma::vec sigsq_x, arma::mat Theta, arma::mat eta, arma::mat xi, arma::mat nu);
+Rcpp::List sample_X(std::vector< std::string > type, arma::mat X_original, arma::vec sigsq_x, arma::mat Theta, arma::mat eta, arma::mat xi, arma::mat nu);
 RcppExport SEXP _bs3fa_sample_X(SEXP typeSEXP, SEXP X_originalSEXP, SEXP sigsq_xSEXP, SEXP ThetaSEXP, SEXP etaSEXP, SEXP xiSEXP, SEXP nuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -357,6 +357,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type xi(xiSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type nu(nuSEXP);
     rcpp_result_gen = Rcpp::wrap(sample_X(type, X_original, sigsq_x, Theta, eta, xi, nu));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sample_X_init
+arma::mat sample_X_init(std::vector< std::string > type, arma::mat X_original, arma::vec sigsq_x);
+RcppExport SEXP _bs3fa_sample_X_init(SEXP typeSEXP, SEXP X_originalSEXP, SEXP sigsq_xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector< std::string > >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X_original(X_originalSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type sigsq_x(sigsq_xSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_X_init(type, X_original, sigsq_x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -400,6 +413,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bs3fa_sample_delta_ome", (DL_FUNC) &_bs3fa_sample_delta_ome, 10},
     {"_bs3fa_sample_Y_miss", (DL_FUNC) &_bs3fa_sample_Y_miss, 5},
     {"_bs3fa_sample_X", (DL_FUNC) &_bs3fa_sample_X, 7},
+    {"_bs3fa_sample_X_init", (DL_FUNC) &_bs3fa_sample_X_init, 3},
     {"_bs3fa_get_sqexp_kernel", (DL_FUNC) &_bs3fa_get_sqexp_kernel, 4},
     {NULL, NULL, 0}
 };

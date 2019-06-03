@@ -97,6 +97,10 @@ sample_X <- function(type, X_original, sigsq_x, Theta, eta, xi, nu) {
     .Call(`_bs3fa_sample_X`, type, X_original, sigsq_x, Theta, eta, xi, nu)
 }
 
+sample_X_init <- function(type, X_original, sigsq_x) {
+    .Call(`_bs3fa_sample_X_init`, type, X_original, sigsq_x)
+}
+
 get_sqexp_kernel <- function(d_vec, l, sig, nugget) {
     .Call(`_bs3fa_get_sqexp_kernel`, d_vec, l, sig, nugget)
 }
