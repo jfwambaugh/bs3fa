@@ -2,7 +2,9 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
                         nsamps_save=500, thin=10, burnin=5000, nugget=1e-8, l=nrow(Y)*0.0008, 
                         update_ls=list("type"="auto", "niter_max"=500, "l_diff"=1/(10*nrow(Y)), 
                                        "reset_ls"=round(3*burnin/4), "l_new"=NULL),
-                        fr_normalize=T, random_init=T, homo_Y=T, print_progress=T, scale_X=T){
+                        fr_normalize=T, random_init=T, homo_Y=T, print_progress=T, scale_X=T,
+                        a1_delta_xi=2.1, a1_delta_om=2.1, a2_delta_xi=3.1, a2_delta_om=3.1,
+                        bad_samp_tol=nsamps_save){
 
   # X - S x N chemical feature matrix, where S is the number of features and N is the no of obs.
   # Y - D x N dose response curve matrix, where S is the number of doses and N is the no of obs.
@@ -30,6 +32,9 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
   # print_progress - Set to T to print sample number every iteration.
   # update_ls - Set to T to update length-scale hyperparam partway through sampling.
   # scale_X - Scale X (set variable means to 0 and SDs to 1).
+  # a1_delta_xi/a1_delta_om - Hyperparameters for B&D shrinkage prior.
+  # a2_delta_xi/a2_delta_om - Hyperparameters for B&D shrinkage prior.
+  # bad_samp_tol - Total number of bad_samps before killing sampler.
 
   # Load libraries and Cpp functions
   library(abind)
@@ -89,8 +94,6 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
   list2env(init_list, environment()) # puts list elements in environment
   a_sig_y = b_sig_y = a_sig_x = b_sig_x = 1; 
   g_xi = g_psi = 1; 
-  a1_delta_xi = a1_delta_om = 2.1; 
-  a2_delta_xi = a2_delta_om = 3.1;
   covDD = get_covDD(matrix(dvec_unique), l);
   # Handle l updating
   update_ls_bool = T
@@ -117,12 +120,14 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
   ##### Run sampler
   init=T # Whether or not intialization is needed (will be changed to F upon initialization in sampler)
   ind=1 # Starting index for saving values.
+  bad_samps=0 # Number of samples for which cov matrix is not symmetric PD
   nsamps = nsamps_save*thin + burnin # Total number of times to loop through sampler.
-  update_samps = seq(1, nsamps, round(nsamps/10))
+  update_samps = seq(1, nsamps, round(nsamps/20))
   psi_lam_min = Inf # Initialize to infinity so anything is smaller.
   for(ss in 1:nsamps){
     if( print_progress & ss%in%update_samps ){
       print(paste(sep="",round(100*ss/nsamps),"% done sampling"))
+      print(paste(sep="",bad_samps," bad samples"))
     }
     
     ##### Update length-scale hyperparameter to be as 'smooth' as possible.
@@ -140,7 +145,13 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
     ##### Sample Y-specific factor loading matrix \Lambda and shrinkage params  #####
     
     # Loadings matrix
-    Lambda = sample_Lambda(Y, Lambda, eta, alpha_lam, sigsq_y_vec, covDD, obs_Y)
+    Lam_samp = sample_Lambda_err(Y, Lambda, eta, alpha_lam, sigsq_y_vec, covDD, obs_Y)
+    Lambda = Lam_samp$Lambda
+    bad_samps = bad_samps + Lam_samp$bad
+    if( bad_samps>bad_samp_tol){
+      print(paste(sep="","Error: bad_samps=",bad_samps,"with l=",l,", try smaller l"))
+      return(-1)
+    }
     # Hyper-params
     psi_lam = sample_psi_lam(g_psi, Lambda, delta_ome, covDD, nugget)
     delta_ome = sample_delta_ome(a1_delta_om, a2_delta_om, delta_ome, psi_lam, 

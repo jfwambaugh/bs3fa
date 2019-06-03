@@ -582,6 +582,83 @@ arma::mat sample_Lambda(arma::mat Y, arma::mat Lambda, arma::mat eta,
 }
 
 // [[Rcpp::export]]
+arma::mat sample_Lambda_err(arma::mat Y, arma::mat Lambda, arma::mat eta, 
+                            arma::vec alpha_lam, arma::vec sigsq_y, 
+                            arma::mat covDD, arma::mat obs_Y){
+  /* 
+  * Function for sampling each column of Lambda = [\lambda_{:,1},...,\lambda_{:,K}].
+  * Each column is D-dimensional vector and is given a GP prior, i.e., 
+  * \lambda_{:,k} ~ GP(0_D, c_k()) where c_k(d,d') = \alpha_k exp(-r||d-d'||^2).
+  * eta is K x N matrix where column N is the length-K vec \eta_i associated with obs i.
+  * covDD is the D x D matrix with entry (d, d') being exp(-r||d-d'||^2).
+  * sigsq_y is the D vector of variance terms for Y.
+  * obs_Y is the D x N matrix where (d,i) is 1 if Y is observed and 0 else.
+  * 
+  */
+  int D = Y.n_rows;
+  int N = Y.n_cols;
+  int K = eta.n_rows;
+  arma::rowvec eta_k_save(N); 
+  arma::mat Y_st(D,N);
+  arma::mat covDD_k(D,D);
+  arma::vec S_st(D);
+  arma::vec w_sum(D);
+  arma::vec gp_mu_k(D);
+  arma::mat gp_cov_k(D,D);
+  arma::mat Lambda_old = Lambda;
+  bool bad = false;
+  
+  // Sample each length-D column vector \lambda_{1:D,k} for k=1,...,K
+  for( int k=0; k<K; k++ ){
+    eta_k_save = eta.row(k);
+    // Set kth row of eta to zero so kth col of Lambda doesn't contribute to Y_st.
+    eta.row(k).fill(0.0);
+    // Get Y* (col i is Y*_i = (Y_i - \sum_{h!=k} \lambda_{col h}\eta_{h,i})/\eta_{k,i} )
+    Y_st = Y - Lambda*eta;
+    S_st.fill(0.0);
+    w_sum.fill(0.0);
+    for( int i=0; i<N; i++ ){ 
+      double eta_k_i = eta_k_save(i);
+      Y_st.col(i) = (Y_st.col(i)) / eta_k_i;
+      for( int d=0; d<D; d++ ){
+        if( obs_Y(d,i)==1 ){
+          double w_tmp = eta_k_i * eta_k_i / sigsq_y(d); // inverse variance weights
+          S_st(d) += w_tmp * Y_st(d,i);
+          w_sum(d) += w_tmp;
+        }
+      }
+    }
+    arma::vec w_sum_inv = 1/w_sum; // D-dimensional
+    S_st = S_st % w_sum_inv; // % is element-wise multiplication
+    // Get column-specific GP covariance matrix covDD_k.
+    covDD_k = alpha_lam(k)*covDD;
+    // Calculate GP mean and covariance.
+    arma::mat tmp_mult = covDD_k;
+    for( int d=0; d<D; d++ ){ tmp_mult(d,d) += w_sum_inv(d); } // + nugget(d)
+    tmp_mult = covDD_k * tmp_mult.i();
+    gp_mu_k = tmp_mult * S_st;
+    gp_cov_k = covDD_k - tmp_mult * covDD_k;
+    // Sample kth column of Lambda.
+    try{
+      Lambda.col(k) = arma::mvnrnd(gp_mu_k, gp_cov_k, 1);
+    } catch (...) {
+      bad = true;
+      break;
+    }
+    // Set kth row of eta back to original value.
+    eta.row(k) = eta_k_save;
+  }
+  
+  if( bad ){
+    return Rcpp::List::create(Rcpp::Named("Lambda") = Lambda_old,
+                              Rcpp::Named("bad") = bad);
+  } else{
+    return Rcpp::List::create(Rcpp::Named("Lambda") = Lambda,
+                              Rcpp::Named("bad") = bad);
+  }
+}
+
+// [[Rcpp::export]]
 double sample_psi_lam(double g, arma::mat Lambda, arma::vec delta_lam, 
                       arma::mat covDD, double nugget){
   /* 
