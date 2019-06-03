@@ -103,7 +103,7 @@ dat$Y[,not_obs] = NA
 ## Set sampler settings
 K_p=dat$K+3 # give sampler 'guess' at true shared loadings
 J_p=dat$J+3 # give sampler 'guess' at true X-specific loadings
-thin=10     # discard every 10th sample
+thin=10     # keep every 10th sample
 burnin=5000 # run sampler for 5000 draws before beginning to save
 nsamps_save=500 # save 500 samples in total
 post_process=T # resolve label/sign switches, rotational ambiguity

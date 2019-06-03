@@ -151,7 +151,7 @@ dat$Y[,not_obs] = NA
 
 K_p=dat$K+3 # give sampler 'guess' at true shared loadings
 J_p=dat$J+3 # give sampler 'guess' at true X-specific loadings
-thin=10     # discard every 10th sample
+thin=10     # keep every 10th sample
 burnin=5000 # run sampler for 5000 draws before beginning to save
 nsamps_save=500 # save 500 samples in total
 post_process=T # resolve label/sign switches, rotational ambiguity
@@ -163,7 +163,10 @@ res=bs3fa::run_sampler(X=dat$X, Y=dat$Y, K=K_p, J=J_p,
                       thin=thin, nsamps_save=nsamps_save, 
                       burnin=burnin, post_process=post_process, 
                       random_init=random_init, scale_X=F,
-                      print_progress=F)
+                      print_progress=F,
+                      update_ls=list("type"="manual", 
+                                     "reset_ls"=round(3*burnin/4), 
+                                     "l_new"=0.111))
 
 ```
 
