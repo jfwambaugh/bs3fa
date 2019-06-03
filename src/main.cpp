@@ -582,7 +582,7 @@ arma::mat sample_Lambda(arma::mat Y, arma::mat Lambda, arma::mat eta,
 }
 
 // [[Rcpp::export]]
-arma::mat sample_Lambda_err(arma::mat Y, arma::mat Lambda, arma::mat eta, 
+Rcpp::List sample_Lambda_err(arma::mat Y, arma::mat Lambda, arma::mat eta, 
                             arma::vec alpha_lam, arma::vec sigsq_y, 
                             arma::mat covDD, arma::mat obs_Y){
   /* 
