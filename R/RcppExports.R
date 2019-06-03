@@ -77,6 +77,10 @@ sample_Lambda <- function(Y, Lambda, eta, alpha_lam, sigsq_y, covDD, obs_Y) {
     .Call(`_bs3fa_sample_Lambda`, Y, Lambda, eta, alpha_lam, sigsq_y, covDD, obs_Y)
 }
 
+sample_Lambda_err <- function(Y, Lambda, eta, alpha_lam, sigsq_y, covDD, obs_Y) {
+    .Call(`_bs3fa_sample_Lambda_err`, Y, Lambda, eta, alpha_lam, sigsq_y, covDD, obs_Y)
+}
+
 sample_psi_lam <- function(g, Lambda, delta_lam, covDD, nugget) {
     .Call(`_bs3fa_sample_psi_lam`, g, Lambda, delta_lam, covDD, nugget)
 }

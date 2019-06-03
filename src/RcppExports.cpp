@@ -276,6 +276,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sample_Lambda_err
+Rcpp::List sample_Lambda_err(arma::mat Y, arma::mat Lambda, arma::mat eta, arma::vec alpha_lam, arma::vec sigsq_y, arma::mat covDD, arma::mat obs_Y);
+RcppExport SEXP _bs3fa_sample_Lambda_err(SEXP YSEXP, SEXP LambdaSEXP, SEXP etaSEXP, SEXP alpha_lamSEXP, SEXP sigsq_ySEXP, SEXP covDDSEXP, SEXP obs_YSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Lambda(LambdaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type alpha_lam(alpha_lamSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type sigsq_y(sigsq_ySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type covDD(covDDSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type obs_Y(obs_YSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_Lambda_err(Y, Lambda, eta, alpha_lam, sigsq_y, covDD, obs_Y));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sample_psi_lam
 double sample_psi_lam(double g, arma::mat Lambda, arma::vec delta_lam, arma::mat covDD, double nugget);
 RcppExport SEXP _bs3fa_sample_psi_lam(SEXP gSEXP, SEXP LambdaSEXP, SEXP delta_lamSEXP, SEXP covDDSEXP, SEXP nuggetSEXP) {
@@ -378,6 +395,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bs3fa_sample_t", (DL_FUNC) &_bs3fa_sample_t, 1},
     {"_bs3fa_get_covDD", (DL_FUNC) &_bs3fa_get_covDD, 2},
     {"_bs3fa_sample_Lambda", (DL_FUNC) &_bs3fa_sample_Lambda, 7},
+    {"_bs3fa_sample_Lambda_err", (DL_FUNC) &_bs3fa_sample_Lambda_err, 7},
     {"_bs3fa_sample_psi_lam", (DL_FUNC) &_bs3fa_sample_psi_lam, 5},
     {"_bs3fa_sample_delta_ome", (DL_FUNC) &_bs3fa_sample_delta_ome, 10},
     {"_bs3fa_sample_Y_miss", (DL_FUNC) &_bs3fa_sample_Y_miss, 5},
