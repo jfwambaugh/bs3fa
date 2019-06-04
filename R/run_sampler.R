@@ -4,7 +4,7 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
                                        "reset_ls"=round(3*burnin/4), "l_new"=NULL),
                         fr_normalize=T, random_init=T, homo_Y=T, print_progress=T, scale_X=T,
                         a1_delta_xi=2.1, a1_delta_om=2.1, a2_delta_xi=3.1, a2_delta_om=3.1,
-                        bad_samp_tol=nsamps_save, debug=F){
+                        bad_samp_tol=nsamps_save, debug=F, sigsq_Y_fixed=NULL){
 
   # X - S x N chemical feature matrix, where S is the number of features and N is the no of obs.
   # Y - D x N dose response curve matrix, where S is the number of doses and N is the no of obs.
@@ -36,6 +36,7 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
   # a2_delta_xi/a2_delta_om - Hyperparameters for B&D shrinkage prior.
   # bad_samp_tol - Total number of bad_samps before killing sampler.
   # debug - For internal debugging, will print when Lambda sample is bad.
+  # sigsq_Y_fixed - Default NULL, but to fix sigsq_Y_vec set to numeric value.
 
   # Load libraries and Cpp functions
   library(abind)
@@ -77,11 +78,12 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
     }
     norm_Y = norm(Y_to_norm, type="F")
     norm_X = norm(X, type="F")
-    Y = norm_X*Y/norm_Y # scale Y so relative weight is the same as that of X
   } else{
     norm_Y = 1
     norm_X = 1
   }
+  norm_rescale=norm_X/norm_Y
+  Y = norm_rescale*Y # scale Y so relative weight is the same as that of X
   # Get obs_Y
   obs_Y = 1*(!is.na(Y)); all_obs=(sum(is.na(Y))==0)
   if( !all_obs ){random_init=T} # Need to randomly init for non-observed sol'n (FIXME?)
@@ -217,7 +219,11 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
     
     # Error terms for Y
     Y_min_mu = get_Y_min_mu(Y, Lambda, eta)
-    sigsq_y_vec = sample_sigsq_y(a_sig_y, b_sig_y, Y_min_mu, obs_Y, homo_Y)
+    if(is.null(sigsq_Y_fixed)){
+      sigsq_y_vec = sample_sigsq_y(a_sig_y, b_sig_y, Y_min_mu, obs_Y, homo_Y)
+    } else{
+      sigsq_y_vec = matrix(rep(norm_rescale^2 * sigsq_Y_fixed, D))
+    }
     # Error terms for X
     X_min_mu = get_X_min_mu(Z, Theta, eta, xi, nu)
     sigsq_x_vec = sample_sigsq_x(a_sig_x, b_sig_y, X_min_mu, X_type)
@@ -256,7 +262,7 @@ run_sampler <- function(X, Y, K, J, X_type=rep("continuous", nrow(X)), dvec_uniq
   res = list("Theta_save"=Theta_save, "Lambda_save"=Lambda_save, "eta_save"=eta_save, 
              "Y_save"=Y_save, "dvec_unique"=dvec_unique, "dvec_unique_original"=dvec_unique_original, 
              "l"=l, "covDD"=covDD, "Y"=Y, "X"=X, "X_save"=X_save, "not_cont_X_vars"=not_cont,
-             "norm_rescale"=norm_X/norm_Y, "kept_X_vars_original"=cond,
+             "norm_rescale"=norm_rescale, "kept_X_vars_original"=cond,
              "S"=S, "D"=D, "K"=K, "J"=J)
   return(res)
 
